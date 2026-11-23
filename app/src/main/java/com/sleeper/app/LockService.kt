@@ -13,9 +13,7 @@ class LockService : AccessibilityService() {
 
     private val handler = Handler(Looper.getMainLooper())
 
-    private val lockRunnable = Runnable {
-        performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN)
-    }
+    private val lockRunnable = Runnable { lockNow() }
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -53,6 +51,10 @@ class LockService : AccessibilityService() {
         }
         if (instance === this) instance = null
         super.onDestroy()
+    }
+
+    fun lockNow(): Boolean {
+        return performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN)
     }
 
     fun reschedule() {
