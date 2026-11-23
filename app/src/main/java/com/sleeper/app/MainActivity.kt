@@ -2,6 +2,8 @@ package com.sleeper.app
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
@@ -18,6 +20,7 @@ class MainActivity : AppCompatActivity() {
     private var status: TextView? = null
     private var service: TextView? = null
     private var toggle: Button? = null
+    private val handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,6 +87,15 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         refresh()
+        handler.postDelayed({ refresh() }, 1500)
+    }
+
+    private fun permissionOn(): Boolean {
+        val list = Settings.Secure.getString(
+            contentResolver,
+            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+        ) ?: ""
+        return list.contains(packageName + "/")
     }
 
     private fun refresh() {
@@ -91,6 +103,8 @@ class MainActivity : AppCompatActivity() {
         val on = prefs.getBoolean("enabled", false)
         status?.text = if (on) "Açık" else "Kapalı"
         toggle?.text = if (on) "Kapat" else "Aç"
-        service?.text = if (LockService.instance != null) "Servis: bağlı" else "Servis: bağlı değil"
+        val perm = if (permissionOn()) "açık" else "kapalı"
+        val conn = if (LockService.instance != null) "bağlı" else "bağlı değil"
+        service?.text = "İzin: " + perm + " | Servis: " + conn
     }
 }
