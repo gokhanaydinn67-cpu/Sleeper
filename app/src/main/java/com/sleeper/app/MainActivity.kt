@@ -5,26 +5,40 @@ import android.os.Bundle
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var status: TextView
-    private lateinit var toggle: Button
-    private lateinit var secondsInput: EditText
-
-    private val prefs by lazy { getSharedPreferences("sleeper", MODE_PRIVATE) }
+    private var status: TextView? = null
+    private var toggle: Button? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        try {
+            setupUi()
+        } catch (t: Throwable) {
+            Log.e("Sleeper", "hata", t)
+            val tv = TextView(this)
+            tv.text = "HATA:\n" + Log.getStackTraceString(t)
+            tv.setPadding(24, 48, 24, 24)
+            val sv = ScrollView(this)
+            sv.addView(tv)
+            setContentView(sv)
+        }
+    }
+
+    private fun setupUi() {
         setContentView(R.layout.activity_main)
+        val prefs = getSharedPreferences("sleeper", MODE_PRIVATE)
 
         status = findViewById(R.id.status)
         toggle = findViewById(R.id.toggle)
-        secondsInput = findViewById(R.id.seconds)
+        val secondsInput = findViewById<EditText>(R.id.seconds)
 
         secondsInput.setText(prefs.getInt("seconds", 30).toString())
 
@@ -40,7 +54,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        toggle.setOnClickListener {
+        toggle?.setOnClickListener {
             val now = !prefs.getBoolean("enabled", false)
             prefs.edit().putBoolean("enabled", now).apply()
             LockService.instance?.reschedule()
@@ -60,8 +74,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun refresh() {
+        val prefs = getSharedPreferences("sleeper", MODE_PRIVATE)
         val on = prefs.getBoolean("enabled", false)
-        status.text = if (on) "Açık" else "Kapalı"
-        toggle.text = if (on) "Kapat" else "Aç"
+        status?.text = if (on) "Açık" else "Kapalı"
+        toggle?.text = if (on) "Kapat" else "Aç"
     }
 }
