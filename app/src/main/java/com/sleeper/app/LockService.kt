@@ -8,10 +8,12 @@ import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
 import android.view.accessibility.AccessibilityEvent
+import androidx.core.content.ContextCompat
 
 class LockService : AccessibilityService() {
 
     private val handler = Handler(Looper.getMainLooper())
+    private var receiverOk = false
 
     private val lockRunnable = Runnable { lockNow() }
 
@@ -28,12 +30,22 @@ class LockService : AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
         instance = this
-        val filter = IntentFilter().apply {
-            addAction(Intent.ACTION_SCREEN_OFF)
-            addAction(Intent.ACTION_SCREEN_ON)
-            addAction(Intent.ACTION_USER_PRESENT)
+        try {
+            val filter = IntentFilter().apply {
+                addAction(Intent.ACTION_SCREEN_OFF)
+                addAction(Intent.ACTION_SCREEN_ON)
+                addAction(Intent.ACTION_USER_PRESENT)
+            }
+            ContextCompat.registerReceiver(
+                this,
+                receiver,
+                filter,
+                ContextCompat.RECEIVER_NOT_EXPORTED
+            )
+            receiverOk = true
+        } catch (t: Throwable) {
+            receiverOk = false
         }
-        registerReceiver(receiver, filter)
         reschedule()
     }
 
@@ -45,9 +57,11 @@ class LockService : AccessibilityService() {
 
     override fun onDestroy() {
         handler.removeCallbacks(lockRunnable)
-        try {
-            unregisterReceiver(receiver)
-        } catch (e: Exception) {
+        if (receiverOk) {
+            try {
+                unregisterReceiver(receiver)
+            } catch (t: Throwable) {
+            }
         }
         if (instance === this) instance = null
         super.onDestroy()
