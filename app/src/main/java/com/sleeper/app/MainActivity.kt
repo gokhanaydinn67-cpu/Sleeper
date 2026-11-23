@@ -10,11 +10,13 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ScrollView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
 
     private var status: TextView? = null
+    private var service: TextView? = null
     private var toggle: Button? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,6 +39,7 @@ class MainActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("sleeper", MODE_PRIVATE)
 
         status = findViewById(R.id.status)
+        service = findViewById(R.id.service)
         toggle = findViewById(R.id.toggle)
         val secondsInput = findViewById<EditText>(R.id.seconds)
 
@@ -61,6 +64,16 @@ class MainActivity : AppCompatActivity() {
             refresh()
         }
 
+        findViewById<Button>(R.id.testBtn).setOnClickListener {
+            val s = LockService.instance
+            if (s == null) {
+                Toast.makeText(this, "Servis bağlı değil", Toast.LENGTH_LONG).show()
+            } else {
+                val ok = s.lockNow()
+                Toast.makeText(this, "Kilit komutu: " + ok, Toast.LENGTH_LONG).show()
+            }
+        }
+
         findViewById<Button>(R.id.accessBtn).setOnClickListener {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
@@ -78,5 +91,6 @@ class MainActivity : AppCompatActivity() {
         val on = prefs.getBoolean("enabled", false)
         status?.text = if (on) "Açık" else "Kapalı"
         toggle?.text = if (on) "Kapat" else "Aç"
+        service?.text = if (LockService.instance != null) "Servis: bağlı" else "Servis: bağlı değil"
     }
 }
