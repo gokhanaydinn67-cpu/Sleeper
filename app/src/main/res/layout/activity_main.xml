@@ -13,6 +13,14 @@
         android:text="Kapalı"
         android:textSize="32sp" />
 
+    <TextView
+        android:id="@+id/service"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Servis: ?"
+        android:textSize="16sp" />
+
     <Button
         android:id="@+id/toggle"
         android:layout_width="match_parent"
@@ -27,6 +35,13 @@
         android:layout_marginTop="16dp"
         android:hint="Saniye"
         android:inputType="number" />
+
+    <Button
+        android:id="@+id/testBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Şimdi kilitle (test)" />
 
     <Button
         android:id="@+id/accessBtn"
